@@ -1,4 +1,5 @@
 local url_count = 0
+local tries = 0
 
 
 wget.callbacks.httploop_result = function(url, err, http_stat)
@@ -10,9 +11,14 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
 
   local status_code = http_stat["statcode"]
 
-  if status_code >= 500 then
+  if status_code >= 500 and tries < 10 then
     io.stdout:write("\nServer returned "..http_stat.statcode..". Sleeping.\n")
     io.stdout:flush()
+
+    if not string.match(url['url'], "mochimedia%.com/")
+    and not string.match(url['url'], "mochiads%.com/") then
+      tries = tries + 1
+    end
 
     os.execute("sleep 60")
     return wget.actions.CONTINUE
